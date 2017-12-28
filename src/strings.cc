@@ -2,8 +2,8 @@
 
 namespace spin_2_fs {
 
-std::list<std::string> SplitStrings(const std::string &in, char sep) {
-  std::list<std::string> components;
+std::vector<std::string> SplitStrings(const std::string &in, char sep) {
+  std::vector<std::string> components;
   auto sep_iter = in.begin();
   for (auto it = in.begin(); it != in.end(); it++) {
     if (*it == sep) {

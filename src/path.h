@@ -3,10 +3,10 @@
 
 #include <optional>
 
-#include <list>
 #include <memory>
 #include <ostream>
 #include <string>
+#include <vector>
 
 namespace spin_2_fs {
 
@@ -19,11 +19,11 @@ public:
   Path &operator=(const Path &) = default;
   Path &operator=(Path &&) = default;
 
-  Path(std::list<std::string> path, bool abs, bool dir);
+  Path(std::vector<std::string> path, bool abs, bool dir);
 
   static Path Cwd();
   inline static Path Root() {
-    return Path(std::list<std::string>{}, true, true);
+    return Path(std::vector<std::string>{}, true, true);
   }
 
   std::string to_string() const;
@@ -52,11 +52,11 @@ public:
   std::string last_component() const;
 
 private:
-  std::list<std::string> get_list() const;
+  std::vector<std::string> get_components() const;
 
-  Path(std::shared_ptr<const std::list<std::string>> path, bool abs, bool dir,
+  Path(std::shared_ptr<const std::vector<std::string>> path, bool abs, bool dir,
        int64_t num_components);
-  std::shared_ptr<const std::list<std::string>> components_;
+  std::shared_ptr<const std::vector<std::string>> components_;
   // True if this was an absolute path.
   bool absolute_;
   // True if there was a trailing slash.

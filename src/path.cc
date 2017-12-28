@@ -28,7 +28,7 @@ bool IsDirectory(const std::string &path) {
   return false;
 }
 
-void StripEmptyPrefixes(std::list<std::string> *components, const bool absolute) {
+void StripEmptyPrefixes(std::vector<std::string> *components, const bool absolute) {
   // remove the empty prefix in case the "absolute" path starts with two or more
   // slashes, a few "." components or ".." components (the last only for
   // absolute paths).
@@ -37,7 +37,7 @@ void StripEmptyPrefixes(std::list<std::string> *components, const bool absolute)
     components->erase(components->begin());
   }
 }
-std::list<std::string> CanonicalizePathList(std::list<std::string> components, bool absolute) {
+std::vector<std::string> CanonicalizePath(std::vector<std::string> components, bool absolute) {
   StripEmptyPrefixes(&components, absolute);
   // Keep track of how far we are into a prefix of non-".." components so far,
   // to handle a "../.." prefix correctly in relative paths.
@@ -77,27 +77,27 @@ std::list<std::string> CanonicalizePathList(std::list<std::string> components, b
   return components;
 }
 
-std::list<std::string> CanonicalizePathList(const std::string &path) {
-  std::list<std::string> components = SplitStrings(path, '/');
+std::vector<std::string> CanonicalizePath(const std::string &path) {
+  std::vector<std::string> components = SplitStrings(path, '/');
   const bool absolute = IsAbsolute(path);
-  return CanonicalizePathList(components, absolute);
+  return CanonicalizePath(components, absolute);
 }
 
 }  // anonymous namespace
 
 Path::Path(const std::string &path)
-    : components_(std::make_shared<std::list<std::string>>(CanonicalizePathList(path))),
+    : components_(std::make_shared<std::vector<std::string>>(CanonicalizePath(path))),
       absolute_(IsAbsolute(path)),
       directory_(IsDirectory(path)),
       num_components_(components_->size()) {}
 
-Path::Path(std::list<std::string> path, bool abs, bool dir)
-    : components_(std::make_shared<std::list<std::string>>(std::move(path))),
+Path::Path(std::vector<std::string> path, bool abs, bool dir)
+    : components_(std::make_shared<std::vector<std::string>>(std::move(path))),
       absolute_(abs),
       directory_(dir),
       num_components_(components_->size()) {}
 
-Path::Path(std::shared_ptr<const std::list<std::string>> path, bool abs, bool dir,
+Path::Path(std::shared_ptr<const std::vector<std::string>> path, bool abs, bool dir,
            int64_t num_components)
     : components_(path), absolute_(abs), directory_(dir), num_components_(num_components) {}
 
@@ -127,14 +127,15 @@ std::string Path::to_string() const {
   return canonical_path;
 }
 
-std::list<std::string> Path::get_list() const {
-  std::list<std::string> components = *components_;
+std::vector<std::string> Path::get_components() const {
+  std::vector<std::string> components = *components_;
+  // Shrink to remove the tail.
   components.resize(num_components_);
   return components;
 }
 
 Path Path::parent() const {
-  std::shared_ptr<const std::list<std::string>> components = components_;
+  std::shared_ptr<const std::vector<std::string>> components = components_;
   int64_t new_components = std::max<int64_t>(num_components_ - 1, 0);
   // special handling for the relative case where we hit the beginning.
   if (!absolute_) {
@@ -154,9 +155,9 @@ Path Path::parent() const {
     }
     // this includes the empty case.
     if (all_parents) {
-      std::list<std::string> components_l = *components_;
-      components_l.push_front("..");
-      components = std::make_shared<const std::list<std::string>>(std::move(components_l));
+      std::vector<std::string> components_l{".."};
+      components_l.insert(components_l.end(), components_->begin(), components_->end());
+      components = std::make_shared<const std::vector<std::string>>(std::move(components_l));
       new_components = num_components_ + 1;
     }
   }
@@ -225,17 +226,18 @@ bool Path::has_parent(const Path &path) const {
 }
 
 Path Path::Join(const Path &suffix) const {
-  std::list<std::string> new_components = get_list();
-  new_components.splice(new_components.end(), suffix.get_list());
+  std::vector<std::string> new_components = get_components();
+  const std::vector<std::string> suffix_elems = suffix.get_components();
+  new_components.insert(new_components.end(), suffix_elems.begin(), suffix_elems.end());
 
-  return Path(CanonicalizePathList(new_components, absolute_), absolute_, suffix.directory_);
+  return Path(CanonicalizePath(new_components, absolute_), absolute_, suffix.directory_);
 }
 
 Path Path::Cwd() {
   std::string cwd;
   cwd.assign(get_current_dir_name());
 
-  return Path(CanonicalizePathList(cwd), true, true);
+  return Path(CanonicalizePath(cwd), true, true);
 }
 
 Path Path::absolute() const {
@@ -280,7 +282,7 @@ std::optional<Path> Path::make_relative(const Path &parent) const {
   }
   auto first_preserved = components_->begin();
   std::advance(first_preserved, parent.num_components_);
-  std::list<std::string> new_components(first_preserved, components_->end());
+  std::vector<std::string> new_components(first_preserved, components_->end());
   return Path(std::move(new_components), false, directory_);
 }
 
