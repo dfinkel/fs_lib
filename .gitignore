@@ -1,0 +1,4 @@
+*.swp
+.ycm_extra_conf.pyc
+bazel-*
+compile_commands.json

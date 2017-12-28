@@ -1,0 +1,31 @@
+cc_library(
+    name = "strings",
+    srcs = ["strings.cc"],
+    hdrs = ["strings.h"],
+    copts = ["-std=c++17"],
+)
+
+
+cc_library(
+    name = "path",
+    srcs = ["path.cc"],
+    hdrs = ["path.h"],
+    copts = ["-std=c++17"],
+    deps = [":strings"],
+)
+
+
+cc_test(
+    name = "path_test",
+    srcs = ["path_test.cc"],
+    copts = [
+        "-Iexternal/gtest/googlemock/include",
+        "-Iexternal/gtest/googletest/include",
+        "-std=c++17",
+    ],
+    deps = [
+        ":path",
+        "@gtest//:gmock_main",
+    ],
+)
+
