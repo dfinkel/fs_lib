@@ -33,7 +33,6 @@ public:
   // returns true if the argument is a parent of *this (e.g. "/" is always a
   // parent of an absolute path)
   bool has_parent(const Path &path) const;
-  Path common_parent(const Path &other) const;
 
   bool is_root() const;
 

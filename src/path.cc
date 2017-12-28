@@ -291,33 +291,4 @@ std::string Path::last_component() const {
   return components_->back();
 }
 
-Path Path::common_parent(const Path &other) const {
-  if (is_absolute() != other.is_absolute()) {
-    // if one is absolute and the other isn't, just return the root.
-    return Path::Root();
-  }
-  if (is_absolute()) {
-    if (components_ == other.components_) {
-      // The backing list of components is represented by the same shared_ptr,
-      // so we are guaranteed that these differ only in the directory attribute
-      // and/or num_components, making the with the smaller num_components_ the
-      // parent (if it's a directory). (otherwise, it's its parent)
-      const Path shorter = num_components_ < other.num_components_ ? *this : other;
-      // This conditinoal is particlularly important if &other == this.
-      return shorter.directory_ ? shorter : shorter.parent();
-    }
-    Path cur_parent = num_components_ < other.num_components_ ? *this : other;
-    while (!cur_parent.is_root()) {
-      if (other.has_parent(cur_parent)) {
-        return cur_parent;
-      }
-      cur_parent = cur_parent.parent();
-    }
-    return Path::Root();
-  }
-  // These are both relative paths.
-  // We hit the boundary condition. Return an empty relative path.
-  return Path(std::list<std::string>(), /* abs = */ false, /* dir = */ true);
-}
-
 }  // namespace spin_2_fs

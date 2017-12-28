@@ -172,18 +172,5 @@ TEST(TestPath, TestLastComponent) {
   EXPECT_EQ(dne, "bim");
 }
 
-TEST(TestPath, TestCommonParent) {
-  const Path foo("/bar/baz/bim/foo/");
-  const Path baz = foo.parent().parent();
-  EXPECT_EQ(foo.common_parent(baz), baz);
-  EXPECT_EQ(baz.common_parent(foo), baz);
-  // foo is a directory, so it is its own common parent.
-  EXPECT_EQ(foo.common_parent(foo), foo);
-  // baz is a directory, so it is its own common parent.
-  EXPECT_EQ(baz.common_parent(baz), baz);
-  const Path baz_indep("/bar/baz/");
-  EXPECT_EQ(foo.common_parent(baz_indep), baz);
-  EXPECT_EQ(baz_indep.common_parent(foo), baz);
-}
 } // anonymous namespace
 } // namespace spin_2_fs
