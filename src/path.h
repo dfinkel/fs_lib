@@ -6,6 +6,7 @@
 #include <memory>
 #include <ostream>
 #include <string>
+#include <string_view>
 #include <vector>
 
 namespace spin_2_fs {
@@ -70,6 +71,65 @@ private:
 inline std::ostream &operator<<(std::ostream &stream, Path path) {
   stream << path.to_string();
   return stream;
+}
+
+constexpr bool is_canonical(const std::string_view p) {
+  // Empty paths are not actually useful, and not really valid as a relative path.
+  if (p.empty()) {
+    return false;
+  }
+  // The only valid canonical path with a "." component, eliminating the need to check for it later.
+  if (p == "./") {
+    return true;
+  }
+  if (p.size() == 1) {
+    // TODO: validate the characters are valid.
+    return true;
+  }
+  const bool absolute = p[0] == '/';
+  bool rel_dot_section = !absolute;
+  int ndots = 0;
+  int nslashes = 0;
+  for (const char c : p) {
+    switch (c) {
+      case '.':
+        ndots++;
+        nslashes = 0;
+        break;
+      case '/':
+        // once we've passed a prefix of ".."s,
+        if ((absolute || !rel_dot_section) && ndots < 3 && ndots != 0) {
+          return false;
+        }
+        if (rel_dot_section && (ndots == 0 || ndots > 2)) {
+          rel_dot_section = false;
+        }
+        // We already handled the only valid cananical paths with a "." component.
+        if (ndots == 1) {
+          return false;
+        }
+        if (nslashes > 0) {
+          return false;
+        }
+        ndots = 0;
+        nslashes++;
+        break;
+      default:
+        ndots = 0;
+        nslashes = 0;
+    }
+  }
+  if ((absolute || !rel_dot_section) && ndots < 3 && ndots != 0) {
+    return false;
+  }
+  // We already handled the only valid cananical paths with a "." component.
+  if (ndots == 1) {
+    return false;
+  }
+  if (nslashes > 1) {
+    return false;
+  }
+  return true;
 }
 
 } // namespace spin_2_fs

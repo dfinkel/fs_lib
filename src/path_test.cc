@@ -64,6 +64,7 @@ TEST(TestPath, IsAbsolute) {
   EXPECT_FALSE(f.is_absolute());
   Path g("/foo/bar/bim");
   EXPECT_TRUE(g.is_absolute());
+  EXPECT_TRUE(is_canonical(g.to_string()));
 }
 
 TEST(TestPath, CanonicalizeRelativePath) {
@@ -80,6 +81,7 @@ TEST(TestPath, CanonicalizeRelativePath) {
             Path("../../../../../../foo/fim/bim/bar/").to_string());
   EXPECT_EQ("../../../../foo/fim/bim/bar/",
             Path("../../foo/bar/../../../../foo/fim/bim/bar/").to_string());
+  EXPECT_TRUE(is_canonical(Path("../../foo/bar/../../../../foo/fim/bim/bar/").to_string()));
 }
 
 TEST(TestPath, IsParent) {
@@ -126,6 +128,7 @@ TEST(TestPath, TestJoin) {
   }
   EXPECT_EQ("voo/vim/von", (vic / Path("./../../vim/von")).to_string());
   EXPECT_EQ("voo/vim/von", (vic / Path("../.././vim/von")).to_string());
+  EXPECT_TRUE(is_canonical((vic / Path("../.././vim/von")).to_string()));
 }
 
 TEST(TestPath, TestCwd) {
@@ -134,6 +137,7 @@ TEST(TestPath, TestCwd) {
   ASSERT_TRUE(chdir("/tmp") == 0);
   const Path tmp = Path::Cwd();
   EXPECT_EQ("/tmp/", tmp.to_string());
+  EXPECT_TRUE(is_canonical(tmp.to_string()));
 }
 
 TEST(TestPath, TestAbsolute) {
@@ -172,5 +176,43 @@ TEST(TestPath, TestLastComponent) {
   EXPECT_EQ(dne, "bim");
 }
 
+TEST(TestCanonical, TooManyDots) {
+  constexpr bool f = is_canonical("./././");
+  static_assert(!f, "`./././` is not a valid path, but is_canonical() returned true");
+  EXPECT_FALSE(is_canonical("./././"));
+  EXPECT_FALSE(is_canonical("./."));
+  EXPECT_FALSE(is_canonical("./.."));
+  EXPECT_FALSE(is_canonical("/.."));
+  EXPECT_FALSE(is_canonical("/."));
+}
+
+TEST(TestCanonical, ManyMoreDots) {
+  EXPECT_TRUE(is_canonical(".../...../....../"));
+  EXPECT_TRUE(is_canonical("..../..."));
+  EXPECT_TRUE(is_canonical("..../..."));
+  EXPECT_TRUE(is_canonical("/..."));
+}
+
+TEST(TestCanonical, EmptyComponents) {
+  EXPECT_FALSE(is_canonical(""));
+  EXPECT_FALSE(is_canonical("//"));
+  EXPECT_FALSE(is_canonical("//fooo"));
+  EXPECT_FALSE(is_canonical("foo//"));
+  EXPECT_FALSE(is_canonical("foo/bar//"));
+  EXPECT_FALSE(is_canonical("foo//bar/"));
+}
+
+TEST(TestCanonical, SpecialCases) {
+  EXPECT_FALSE(is_canonical(""));
+  EXPECT_TRUE(is_canonical("./"));
+  EXPECT_TRUE(is_canonical("."));
+  EXPECT_TRUE(is_canonical("/"));
+  EXPECT_TRUE(is_canonical("a"));
+}
+
+TEST(TestCanonical, RelPrefix) {
+  EXPECT_TRUE(is_canonical("../../../a/b/c/d"));
+  EXPECT_TRUE(is_canonical("../../../a/b/c/d/"));
+}
 } // anonymous namespace
 } // namespace spin_2_fs
