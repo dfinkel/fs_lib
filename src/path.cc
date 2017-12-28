@@ -128,10 +128,7 @@ std::string Path::to_string() const {
 }
 
 std::vector<std::string> Path::get_components() const {
-  std::vector<std::string> components = *components_;
-  // Shrink to remove the tail.
-  components.resize(num_components_);
-  return components;
+  return std::vector<std::string>(components_->begin(), components_->begin() + num_components_);
 }
 
 Path Path::parent() const {
