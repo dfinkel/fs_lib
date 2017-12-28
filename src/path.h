@@ -36,7 +36,7 @@ public:
 
   bool is_root() const;
 
-  inline bool is_absolute() const { return absolute_; }
+  constexpr bool is_absolute() const { return absolute_; }
 
   bool operator<(const Path &other) const;
 
