@@ -18,14 +18,11 @@ cc_library(
 cc_test(
     name = "path_test",
     srcs = ["path_test.cc"],
-    copts = [
-        "-Iexternal/gtest/googlemock/include",
-        "-Iexternal/gtest/googletest/include",
-        "-std=c++17",
-    ],
     deps = [
         ":path",
-        "@gtest//:gmock_main",
+        "@com_google_googletest//:gtest",
+        "@com_google_googletest//:gtest_main",
     ],
+    copts = ["-std=c++17", "-stdlib=libc++"],
+    linkopts = ["-stdlib=libc++", "-lc++"],
 )
-

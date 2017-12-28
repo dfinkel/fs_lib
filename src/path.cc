@@ -28,19 +28,16 @@ bool IsDirectory(const std::string &path) {
   return false;
 }
 
-void StripEmptyPrefixes(std::list<std::string> *components,
-                        const bool absolute) {
+void StripEmptyPrefixes(std::list<std::string> *components, const bool absolute) {
   // remove the empty prefix in case the "absolute" path starts with two or more
   // slashes, a few "." components or ".." components (the last only for
   // absolute paths).
-  while (!components->empty() &&
-         (components->front().empty() || components->front() == "." ||
-          (absolute && components->front() == ".."))) {
+  while (!components->empty() && (components->front().empty() || components->front() == "." ||
+                                  (absolute && components->front() == ".."))) {
     components->erase(components->begin());
   }
 }
-std::list<std::string> CanonicalizePathList(std::list<std::string> components,
-                                            bool absolute) {
+std::list<std::string> CanonicalizePathList(std::list<std::string> components, bool absolute) {
   StripEmptyPrefixes(&components, absolute);
   // Keep track of how far we are into a prefix of non-".." components so far,
   // to handle a "../.." prefix correctly in relative paths.
@@ -86,22 +83,23 @@ std::list<std::string> CanonicalizePathList(const std::string &path) {
   return CanonicalizePathList(components, absolute);
 }
 
-} // anonymous namespace
+}  // anonymous namespace
 
 Path::Path(const std::string &path)
-    : components_(
-          std::make_shared<std::list<std::string>>(CanonicalizePathList(path))),
-      absolute_(IsAbsolute(path)), directory_(IsDirectory(path)),
+    : components_(std::make_shared<std::list<std::string>>(CanonicalizePathList(path))),
+      absolute_(IsAbsolute(path)),
+      directory_(IsDirectory(path)),
       num_components_(components_->size()) {}
 
 Path::Path(std::list<std::string> path, bool abs, bool dir)
     : components_(std::make_shared<std::list<std::string>>(std::move(path))),
-      absolute_(abs), directory_(dir), num_components_(components_->size()) {}
+      absolute_(abs),
+      directory_(dir),
+      num_components_(components_->size()) {}
 
-Path::Path(std::shared_ptr<const std::list<std::string>> path, bool abs,
-           bool dir, int64_t num_components)
-    : components_(path), absolute_(abs), directory_(dir),
-      num_components_(num_components) {}
+Path::Path(std::shared_ptr<const std::list<std::string>> path, bool abs, bool dir,
+           int64_t num_components)
+    : components_(path), absolute_(abs), directory_(dir), num_components_(num_components) {}
 
 std::string Path::to_string() const {
   std::string canonical_path;
@@ -158,8 +156,7 @@ Path Path::parent() const {
     if (all_parents) {
       std::list<std::string> components_l = *components_;
       components_l.push_front("..");
-      components = std::make_shared<const std::list<std::string>>(
-          std::move(components_l));
+      components = std::make_shared<const std::list<std::string>>(std::move(components_l));
       new_components = num_components_ + 1;
     }
   }
@@ -190,8 +187,8 @@ bool Path::operator<(const Path &other) const {
   auto it = components_->begin();
   auto oit = other.components_->begin();
 
-  for (int i = 0; i < num_components_ && i < other.num_components_ &&
-                  it != components_->end() && oit != other.components_->end();
+  for (int i = 0; i < num_components_ && i < other.num_components_ && it != components_->end() &&
+                  oit != other.components_->end();
        i++, it++, oit++) {
     if (*it == *oit) {
       continue;
@@ -216,8 +213,8 @@ bool Path::has_parent(const Path &path) const {
   auto it = components_->begin();
   auto oit = path.components_->begin();
 
-  for (int i = 0; i < num_components_ && i < path.num_components_ &&
-                  it != components_->end() && oit != path.components_->end();
+  for (int i = 0; i < num_components_ && i < path.num_components_ && it != components_->end() &&
+                  oit != path.components_->end();
        i++, it++, oit++) {
     if (*it == *oit) {
       continue;
@@ -231,8 +228,7 @@ Path Path::Join(const Path &suffix) const {
   std::list<std::string> new_components = get_list();
   new_components.splice(new_components.end(), suffix.get_list());
 
-  return Path(CanonicalizePathList(new_components, absolute_), absolute_,
-              suffix.directory_);
+  return Path(CanonicalizePathList(new_components, absolute_), absolute_, suffix.directory_);
 }
 
 Path Path::Cwd() {
@@ -264,8 +260,7 @@ bool Path::operator==(const Path &other) const {
   }
   auto it = components_->begin();
   auto oit = components_->begin();
-  for (int i = 0; i < num_components_ && it != components_->end();
-       i++, it++, oit++) {
+  for (int i = 0; i < num_components_ && it != components_->end(); i++, it++, oit++) {
     if (*it == *oit) {
       continue;
     }
@@ -274,15 +269,14 @@ bool Path::operator==(const Path &other) const {
   return true;
 }
 
-std::experimental::optional<Path>
-Path::make_relative(const fs::Path &parent) const {
+std::optional<Path> Path::make_relative(const Path &parent) const {
   if (!has_parent(parent)) {
     // This is not a parent, so there isn't anything we can do, just return
     // null.
-    return std::experimental::nullopt;
+    return std::nullopt;
   }
   if (absolute_ != parent.absolute_) {
-    return std::experimental::nullopt;
+    return std::nullopt;
   }
   auto first_preserved = components_->begin();
   std::advance(first_preserved, parent.num_components_);
@@ -308,8 +302,7 @@ Path Path::common_parent(const Path &other) const {
       // so we are guaranteed that these differ only in the directory attribute
       // and/or num_components, making the with the smaller num_components_ the
       // parent (if it's a directory). (otherwise, it's its parent)
-      const Path shorter =
-          num_components_ < other.num_components_ ? *this : other;
+      const Path shorter = num_components_ < other.num_components_ ? *this : other;
       // This conditinoal is particlularly important if &other == this.
       return shorter.directory_ ? shorter : shorter.parent();
     }
@@ -327,4 +320,4 @@ Path Path::common_parent(const Path &other) const {
   return Path(std::list<std::string>(), /* abs = */ false, /* dir = */ true);
 }
 
-} // namespace spin_2_fs
+}  // namespace spin_2_fs
