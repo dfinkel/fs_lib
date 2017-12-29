@@ -39,10 +39,8 @@ TEST(TestPath, CanonicalizeAbsolutePaths) {
   EXPECT_EQ("/foo/bar/fim", Path("/foo/bar/boo/../fim").to_string());
   EXPECT_EQ("/foo/bar/fim", Path("/foo/bar/boo/bim/../../fim").to_string());
   EXPECT_EQ("/fim", Path("/foo/bar/boo/bim/../../../../../fim").to_string());
-  EXPECT_EQ("/fim",
-            Path("/foo/bar/boo/bim/../../../../../../../fim").to_string());
-  EXPECT_EQ("/fim",
-            Path("/foo/bar/boo/bim/.././.././../../../fim").to_string());
+  EXPECT_EQ("/fim", Path("/foo/bar/boo/bim/../../../../../../../fim").to_string());
+  EXPECT_EQ("/fim", Path("/foo/bar/boo/bim/.././.././../../../fim").to_string());
   EXPECT_EQ("/foo/fim", Path("/foo/./boo/../fim").to_string());
   EXPECT_EQ("/", Path("/.././.././../////.././").to_string());
   EXPECT_EQ("/foo/fim", Path("/foo/bar/boo/bim/../../../fim").to_string());
@@ -66,8 +64,7 @@ TEST(TestPath, ConstructParentRelative) {
   EXPECT_EQ(".", fim.parent().parent().parent().to_string());
   // Verify that we start getting ".." components as we add more parents.
   EXPECT_EQ("../", fim.parent().parent().parent().parent().to_string());
-  EXPECT_EQ("../../",
-            fim.parent().parent().parent().parent().parent().to_string());
+  EXPECT_EQ("../../", fim.parent().parent().parent().parent().parent().to_string());
   EXPECT_EQ("../../../", Path("").parent().parent().parent().to_string());
   EXPECT_EQ("../../../../", Path("..").parent().parent().parent().to_string());
   EXPECT_EQ(".", Path("").to_string());
@@ -100,10 +97,8 @@ TEST(TestPath, CanonicalizeRelativePath) {
   EXPECT_EQ("../foo/", foo.parent().to_string());
   EXPECT_EQ("../foo/bar", Path("./.././foo/./fim/../bar").to_string());
   EXPECT_EQ("../foo/bar/", Path("./.././foo/./fim/../bar/").to_string());
-  EXPECT_EQ("../foo/fim/bim/bar/",
-            Path("./.././foo/fim/bim/bop/../bar/").to_string());
-  EXPECT_EQ("../../foo/fim/bim/bar/",
-            Path("../../foo/fim/bim/bar/").to_string());
+  EXPECT_EQ("../foo/fim/bim/bar/", Path("./.././foo/fim/bim/bop/../bar/").to_string());
+  EXPECT_EQ("../../foo/fim/bim/bar/", Path("../../foo/fim/bim/bar/").to_string());
   EXPECT_EQ("../../../../../../foo/fim/bim/bar/",
             Path("../../../../../../foo/fim/bim/bar/").to_string());
   EXPECT_EQ("../../../../foo/fim/bim/bar/",
@@ -135,14 +130,10 @@ TEST(TestPath, TestJoin) {
   Path bar_abs_slash = bin / bar;
   EXPECT_EQ("/boo/bin/bim/foo/bar", bar_abs_slash.to_string());
 
-  EXPECT_EQ("/foo/bar/bim/boo",
-            (Path("/foo/bar/bim/bing") / Path("../boo")).to_string());
-  EXPECT_EQ("/foo/bar/boo",
-            (Path("/foo/bar/bim/bing") / Path("../../boo")).to_string());
-  EXPECT_EQ("/foo/bar/boo",
-            (Path("/foo/bar/bim/bing") / Path("./../../boo")).to_string());
-  EXPECT_EQ("/foo/bar/boo/",
-            (Path("/foo/bar/bim/bing") / Path("./../../boo/")).to_string());
+  EXPECT_EQ("/foo/bar/bim/boo", (Path("/foo/bar/bim/bing") / Path("../boo")).to_string());
+  EXPECT_EQ("/foo/bar/boo", (Path("/foo/bar/bim/bing") / Path("../../boo")).to_string());
+  EXPECT_EQ("/foo/bar/boo", (Path("/foo/bar/bim/bing") / Path("./../../boo")).to_string());
+  EXPECT_EQ("/foo/bar/boo/", (Path("/foo/bar/bim/bing") / Path("./../../boo/")).to_string());
 
   Path vic("voo/vim/vik");
   {
@@ -184,8 +175,7 @@ TEST(TestPath, TestMakeRelative) {
   const std::optional<Path> bar_foo = foo.make_relative(bim);
   EXPECT_EQ(bar_foo.value(), Path("bar/foo"));
   const std::optional<Path> dne = bim.make_relative(foo);
-  EXPECT_EQ(dne.value_or(Path("/foo/bar/bim/boo/bop/vim")),
-            Path("/foo/bar/bim/boo/bop/vim"));
+  EXPECT_EQ(dne.value_or(Path("/foo/bar/bim/boo/bop/vim")), Path("/foo/bar/bim/boo/bop/vim"));
 }
 
 TEST(TestPath, TestRoot) {
@@ -241,5 +231,5 @@ TEST(TestCanonical, RelPrefix) {
   EXPECT_TRUE(is_canonical("../../../a/b/c/d"));
   EXPECT_TRUE(is_canonical("../../../a/b/c/d/"));
 }
-} // anonymous namespace
-} // namespace spin_2_fs
+}  // anonymous namespace
+}  // namespace spin_2_fs

@@ -46,4 +46,4 @@ std::vector<std::string> SplitStrings(const std::string &in, char sep) {
   return components;
 }
 
-} // namespace spin_2_fs
+}  // namespace spin_2_fs

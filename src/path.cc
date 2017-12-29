@@ -180,7 +180,7 @@ Path Path::parent() const {
     // this includes the empty case.
     if (all_parents) {
       std::vector<std::string> components_l{".."};
-      components_l.reserve(1+num_components_);
+      components_l.reserve(1 + num_components_);
       components_l.insert(components_l.end(), components_->begin(), components_->end());
       components = std::make_shared<const std::vector<std::string>>(std::move(components_l));
       new_components = num_components_ + 1;

@@ -39,7 +39,7 @@
 namespace spin_2_fs {
 
 class Path {
-public:
+ public:
   explicit Path(const std::string &path);
   // Enable the default move and copy constructors.
   Path(const Path &path) = default;
@@ -50,9 +50,7 @@ public:
   Path(std::vector<std::string> path, bool abs, bool dir);
 
   static Path Cwd();
-  inline static Path Root() {
-    return Path(std::vector<std::string>{}, true, true);
-  }
+  inline static Path Root() { return Path(std::vector<std::string>{}, true, true); }
 
   std::string to_string() const;
 
@@ -79,7 +77,7 @@ public:
 
   std::string last_component() const;
 
-private:
+ private:
   std::vector<std::string> get_components() const;
 
   Path(std::shared_ptr<const std::vector<std::string>> path, bool abs, bool dir,
@@ -159,5 +157,5 @@ constexpr bool is_canonical(const std::string_view p) {
   return true;
 }
 
-} // namespace spin_2_fs
-#endif // include_path_h
+}  // namespace spin_2_fs
+#endif  // include_path_h
