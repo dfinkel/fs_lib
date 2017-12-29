@@ -1,4 +1,4 @@
-workspace(name = "spin_2_path")
+workspace(name = "spin_2_fs_lib")
 
 git_repository(
     name = "com_google_googletest",
