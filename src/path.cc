@@ -191,8 +191,6 @@ Path Path::parent() const {
   return up;
 }
 
-bool Path::is_root() const { return num_components_ == 0 && absolute_; }
-
 bool Path::operator<(const Path &other) const {
   // make relative paths sort after absolute ones.
   if (other.absolute_ != absolute_) {

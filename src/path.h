@@ -60,7 +60,7 @@ class Path {
   // parent of an absolute path)
   bool has_parent(const Path &path) const;
 
-  bool is_root() const;
+  constexpr bool is_root() const { return num_components_ == 0 && absolute_; }
 
   constexpr bool is_absolute() const { return absolute_; }
 
