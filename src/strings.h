@@ -37,3 +37,4 @@ std::vector<std::string> SplitStrings(const std::string &in, char sep);
 }  // namespace spin_2_fs
 
 #endif  // include_strings_h
+// vim: sw=2:sts=2:tw=100:et:cindent:cinoptions=l1,g1,h1,N-s,E-s,i2s,+2s,(0,w1,W2s

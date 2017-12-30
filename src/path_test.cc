@@ -233,3 +233,4 @@ TEST(TestCanonical, RelPrefix) {
 }
 }  // anonymous namespace
 }  // namespace spin_2_fs
+// vim: sw=2:sts=2:tw=100:et:cindent:cinoptions=l1,g1,h1,N-s,E-s,i2s,+2s,(0,w1,W2s
