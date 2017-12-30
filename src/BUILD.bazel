@@ -11,6 +11,7 @@ cc_library(
     srcs = ["path.cc"],
     hdrs = ["path.h"],
     copts = ["-std=c++17"],
+    visibility = ["//visibility:public"],
     deps = [":strings"],
 )
 
