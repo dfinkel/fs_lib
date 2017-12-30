@@ -200,7 +200,7 @@ bool Path::operator<(const Path &other) const {
     return true;
   }
   if (components_ == other.components_) {
-    // it's the same list, compare lengths.
+    // it's the same vector, compare lengths.
     if (num_components_ != other.num_components_) {
       return (num_components_ < other.num_components_);
     }
