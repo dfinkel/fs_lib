@@ -25,8 +25,8 @@
 // OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#ifndef include_strings_h
-#define include_strings_h
+#ifndef include_spin_2_fs_strings_h
+#define include_spin_2_fs_strings_h
 
 #include <string>
 #include <vector>
@@ -36,5 +36,5 @@ std::vector<std::string> SplitStrings(const std::string &in, char sep);
 
 }  // namespace spin_2_fs
 
-#endif  // include_strings_h
+#endif  // include_spin_2_fs_strings_h
 // vim: sw=2:sts=2:tw=100:et:cindent:cinoptions=l1,g1,h1,N-s,E-s,i2s,+2s,(0,w1,W2s
