@@ -38,6 +38,12 @@
 
 namespace spin_2_fs {
 
+// Path represents a filesystem path. Attempts have been made to make common operations such as
+// fetching the parent directory cheap.
+//
+// The underlying vector containing path-components is reference-counted, so requesting the parent
+// directory involves copying 2 bools, 1 int (that gets decremented), a pointer and updating a
+// shared_ptr refcount.
 class Path {
  public:
   explicit Path(const std::string &path);
@@ -47,11 +53,16 @@ class Path {
   Path &operator=(const Path &) = default;
   Path &operator=(Path &&) = default;
 
+  // Raw Constructor intended for bypassing validation and string parsing.
   Path(std::vector<std::string> path, bool abs, bool dir);
 
+  // Get the current working directory as a Path object.
   static Path Cwd();
+  // Fast factory for a Path representing "/".
   inline static Path Root() { return Path(std::vector<std::string>{}, true, true); }
 
+  // Since we can't add a std::string constructor for Path, we have to settle for a to_string()
+  // method.
   std::string to_string() const;
 
   // returns the parent directory.
@@ -60,26 +71,42 @@ class Path {
   // parent of an absolute path)
   bool has_parent(const Path &path) const;
 
+  // As the name implies, returns true iff the path is "/".
+  // (useful in the termination condition for loops iterating over parent directories)
   constexpr bool is_root() const { return num_components_ == 0 && absolute_; }
 
+  // Returns false if the path is relative.
   constexpr bool is_absolute() const { return absolute_; }
 
+  // Used for sorting paths. Unlike strict lexical sorting, parent paths always sort immediately
+  // before children.
+  // Relative paths sort after absolute ones.
   bool operator<(const Path &other) const;
 
+  // Concatenation methods.
   Path Join(const Path &suffix) const;
   inline Path operator/(const Path &suffix) const { return Join(suffix); }
+
   bool operator==(const Path &other) const;
   inline bool operator!=(const Path &other) const { return !(*this == other); }
+
   // Return a new, relative path constructed by removing a parent.
+  // May return std:nullopt if the parent argument is not an actually a parent of the path
+  // make_relative() is operating on.
   std::optional<Path> make_relative(const Path &parent) const;
 
+  // Converts a relative path into an absolute path by applying the relative path to the CWD.
   Path absolute() const;
 
+  // Returns the last component of the path or an empty string if the path is empty or the root.
   std::string last_component() const;
 
  private:
+  // Copies the current vector of components, trimmed down to the correct length. (used to implement
+  // a number of methods)
   std::vector<std::string> get_components() const;
 
+  // Internal constructor used to implement the reference-counted components.
   Path(std::shared_ptr<const std::vector<std::string>> path, bool abs, bool dir,
        int64_t num_components);
   std::shared_ptr<const std::vector<std::string>> components_;
@@ -98,6 +125,9 @@ inline std::ostream &operator<<(std::ostream &stream, Path path) {
   return stream;
 }
 
+// constexpr function for verifying if a string is a canonical path. Intended usage is with
+// static_assert and string_view compile-time constants to enforce that such strings are in a
+// canonical form.
 constexpr bool is_canonical(const std::string_view p) {
   // Empty paths are not actually useful, and not really valid as a relative path.
   if (p.empty()) {
